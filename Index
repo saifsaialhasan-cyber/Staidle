@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staidle - Automated AI & Creator Video Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slateBlue: '#0f172a',
+                        darkCharcoal: '#1e293b',
+                        accentBlue: '#3b82f6',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        .star {
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        .star:nth-child(even) {
+            animation-duration: 2s;
+        }
+        .star:nth-child(3n) {
+            animation-duration: 4s;
+        }
+    </style>
+</head>
+<body class="bg-slateBlue text-slate-100 min-h-screen font-sans selection:bg-accentBlue selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="sticky top-0 z-50 bg-slateBlue/90 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i data-lucide="video" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">STAIDLE</h1>
+                    <p class="text-xs text-slate-400">Automated Video Marketplace</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links & Language Switcher -->
+            <div class="flex items-center space-x-4">
+                <select id="globalLang" onchange="switchLanguage(this.value)" class="bg-darkCharcoal border border-slate-700 text-xs px-2 py-1.5 rounded-lg focus:outline-none focus:border-blue-500">
+                    <option value="bn">বাংলা (Bengali)</option>
+                    <option value="en">English</option>
+                </select>
+                <button onclick="switchTab('customer')" id="navCustomer" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white transition shadow-sm">Customer</button>
+                <button onclick="switchTab('creator')" id="navCreator" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-darkCharcoal transition">Creator</button>
+                <button onclick="switchTab('admin')" id="navAdmin" class="px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-darkCharcoal transition">Admin</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Header with Starry Sky Animation -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slateBlue py-12 border-b border-slate-800">
+        <!-- Starry Sky Background Elements -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="star absolute top-4 left-10 w-1 h-1 bg-white rounded-full shadow-[0_0_6px_#fff]"></div>
+            <div class="star absolute top-12 left-1/4 w-1.5 h-1.5 bg-blue-200 rounded-full shadow-[0_0_8px_#93c5fd]"></div>
+            <div class="star absolute top-8 left-1/2 w-1 h-1 bg-white rounded-full shadow-[0_0_6px_#fff]"></div>
+            <div class="star absolute top-16 right-1/4 w-2 h-2 bg-indigo-200 rounded-full shadow-[0_0_10px_#c7d2fe]"></div>
+            <div class="star absolute top-6 right-10 w-1 h-1 bg-white rounded-full shadow-[0_0_6px_#fff]"></div>
+            <div class="star absolute bottom-4 left-1/3 w-1.5 h-1.5 bg-blue-300 rounded-full shadow-[0_0_8px_#93c5fd]"></div>
+        </div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 id="heroTitle" class="text-3xl md:text-4xl font-extrabold mb-2 tracking-tight">আপনার ভিডিও এডিটিং ও এআই অটোমেশন হাব</h2>
+            <p id="heroSub" class="text-sm md:text-base text-slate-400">১০০% সিকিউর, দ্রুত এবং নির্ভরযোগ্য স্মার্ট ভিডিও মার্কেটপ্লেস।</p>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- ================= CUSTOMER PANEL ================= -->
+        <div id="customerPanel" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Order Submission Form -->
+                <div class="lg:col-span-2 bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+                    <h3 class="text-lg font-bold mb-4 flex items-center space-x-2 text-blue-400">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span>নতুন ভিডিও অর্ডারের আবেদন</span>
+                    </h3>
+                    
+                    <!-- AI Token Exhaustion Alert Banner (Dynamic) -->
+                    <div id="aiTokenAlert" class="hidden mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-xs flex items-center space-x-2">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 flex-shrink-0"></i>
+                        <span id="aiAlertText">দুঃখিত! এই ক্যাটাগরির এআই সার্ভিসের দৈনিক টোকেন শেষ হয়ে গেছে। বর্তমানে সাময়িকভাবে বন্ধ আছে।</span>
+                    </div>
+
+                    <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">আপনার নাম</label>
+                                <input type="text" id="custName" required placeholder="পূর্ণ নাম লিখুন" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">সোশ্যাল অ্যাকাউন্ট / হ্যান্ডেল</label>
+                                <input type="text" id="custHandle" placeholder="যেমন: @username বা ফোন" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">ভিডিওর মূল ভাষা (From Language)</label>
+                                <select id="fromLang" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="Bangla">বাংলা (Bengali)</option>
+                                    <option value="English">English</option>
+                                    <option value="Hindi">Hindi / Urdu</option>
+                                    <option value="Arabic">Arabic</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">কাঙ্খিত ভাষা (To Language / Translation)</label>
+                                <select id="toLang" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="Same">পরিবর্তন নেই (Same)</option>
+                                    <option value="English">English Dub/Sub</option>
+                                    <option value="Bangla">Bangla Dub/Sub</option>
+                                    <option value="Arabic">Arabic Sub</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">টার্গেট প্ল্যাটফর্ম</label>
+                                <select id="videoPlatform" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="Shorts">YouTube Shorts / Reels (9:16)</option>
+                                    <option value="Long">YouTube Long Video (16:9)</option>
+                                    <option value="Square">Square Post (1:1)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">এডিটিং স্টাইল ও ভাইব</label>
+                                <select id="editStyle" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="Educational">শিক্ষণীয় / সংশোধনমূলক (Educational)</option>
+                                    <option value="DarkMystery">ডার্ক মিস্ট্রি / থ্রিলার</option>
+                                    <option value="Podcast">পডকাস্ট / ফোকাসড কাট</option>
+                                    <option value="Vlog">ব্লগ / লাইফস্টাইল</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">ভিডিওর দৈর্ঘ্য</label>
+                                <select id="videoDuration" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="Under1">১ মিনিটের কম (Shorts)</option>
+                                    <option value="1to5">১ থেকে ৫ মিনিট</option>
+                                    <option value="5to15">৫ থেকে ১৫ মিনিট</option>
+                                    <option value="15plus">১৫+ মিনিট</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">ভিডিও ড্রাইভ লিংক বা সোর্স লিংক</label>
+                            <input type="url" id="sourceLink" required placeholder="https://drive.google.com/... বা ইউটিউব লিংক" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">কাজের বিবরণ বা বিশেষ নির্দেশনা</label>
+                            <textarea id="orderDesc" rows="2" placeholder="যেমন: শিক্ষণীয় বা সংশোধনমূলক ক্লিপ তৈরি করতে হবে..." class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"></textarea>
+                        </div>
+
+                        <!-- Add-on Checkboxes -->
+                        <div class="bg-slateBlue/50 p-3 rounded-xl border border-slate-800 space-y-2">
+                            <span class="text-xs font-bold text-slate-300">অ্যাড-অন সার্ভিস (Add-ons):</span>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                <label class="flex items-center space-x-2"><input type="checkbox" id="addonSub" class="rounded bg-slate-800 border-slate-700 text-blue-600"> <span>অটো সাবটাইটেল</span></label>
+                                <label class="flex items-center space-x-2"><input type="checkbox" id="addonSound" class="rounded bg-slate-800 border-slate-700 text-blue-600"> <span>সাউন্ড ইফেক্ট</span></label>
+                                <label class="flex items-center space-x-2"><input type="checkbox" id="addonNoise" class="rounded bg-slate-800 border-slate-700 text-blue-600"> <span>নয়েজ রিমুভাল</span></label>
+                                <label class="flex items-center space-x-2"><input type="checkbox" id="addonThumb" class="rounded bg-slate-800 border-slate-700 text-blue-600"> <span>থাম্বনেল মেকিং</span></label>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">পেমেন্ট মেথড</label>
+                                <select id="payMethod" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                                    <option value="bKash">বিকাশ / নগদ (Local)</option>
+                                    <option value="GooglePay">Google Pay / Wise (International)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">পেমেন্ট ট্রানজেকশন আইডি (TrxID / Receipt)</label>
+                                <input type="text" id="trxId" required placeholder="যেমন: TRX98765432" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 hover:opacity-90 transition">
+                            অর্ডার সাবমিট করুন (Submit Order)
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Customer Order Tracking & Status Search -->
+                <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold mb-4 flex items-center space-x-2 text-blue-400">
+                            <i data-lucide="search" class="w-5 h-5"></i>
+                            <span>অর্ডার ট্র্যাকিং ও স্ট্যাটাস</span>
+                        </h3>
+                        <p class="text-xs text-slate-400 mb-4">আপনার প্রজেক্ট কোড বা TrxID দিয়ে সার্চ করে বর্তমান আপডেট ও ডেলিভারি ফাইল দেখুন।</p>
+
+                        <div class="space-y-3">
+                            <input type="text" id="searchCodeInput" placeholder="প্রজেক্ট কোড বা TrxID দিন" class="w-full bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                            <button onclick="searchCustomerOrder()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-sm transition border border-slate-700">
+                                স্ট্যাটাস চেক করুন
+                            </button>
+                        </div>
+
+                        <!-- Search Result Box -->
+                        <div id="searchResultBox" class="mt-6 p-4 bg-slateBlue/80 rounded-xl border border-slate-800 hidden text-xs space-y-2">
+                            <div class="flex justify-between font-bold text-slate-200">
+                                <span id="resCode">--</span>
+                                <span id="resStatus" class="text-blue-400">--</span>
+                            </div>
+                            <p class="text-slate-400" id="resDetails">--</p>
+                            <div id="resLinkContainer" class="pt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Creator Availability Notice -->
+                    <div id="creatorAvailabilityBox" class="mt-6 p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-xs text-blue-300 flex items-center space-x-2">
+                        <i data-lucide="shield-check" class="w-5 h-5 flex-shrink-0"></i>
+                        <span id="creatorNoticeText">সিস্টেমে বর্তমানে সক্রিয় এডিটর ও ক্রিয়েটররা প্রস্তুত আছেন।</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= CREATOR PANEL ================= -->
+        <div id="creatorPanel" class="space-y-8 hidden">
+            <!-- Creator Signup / Login Bar -->
+            <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <h3 class="text-lg font-bold mb-2 flex items-center space-x-2 text-indigo-400">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    <span>ক্রিয়েটর রেজিস্ট্রেশন ও একাউন্ট সেটআপ</span>
+                </h3>
+                <p class="text-xs text-slate-400 mb-4">অ্যাকাউন্ট খোলার সময় অবশ্যই আপনার সঠিক পেমেন্ট অ্যাকাউন্ট (বিকাশ ও Google Pay) যুক্ত করুন।</p>
+
+                <form id="creatorSignupForm" onsubmit="handleCreatorSignup(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" id="regCreatorName" required placeholder="আপনার নাম" class="bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="regBkash" required placeholder="বিকাশ অ্যাকাউন্ট নাম্বার" class="bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="regGooglePay" required placeholder="Google Pay / Wise Email" class="bg-slateBlue border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-500">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition">রেজিস্ট্রেশন সম্পন্ন করুন</button>
+                </form>
+            </div>
+
+            <!-- Creator Dashboard Workspace -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left: Available & Working Tasks -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold flex items-center space-x-2 text-indigo-400">
+                                <i data-lucide="list-todo" class="w-5 h-5"></i>
+                               <span>অ্যাভেইলেবল টাস্ক বোর্ড (Available Tasks)</span>
+                            </h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs text-slate-400">স্ট্যাটাস:</span>
+                                <button onclick="toggleCreatorStatus()" id="creatorStatusToggle" class="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-lg text-xs font-semibold">Active (Online)</button>
+                            </div>
+                        </div>
+
+                        <!-- Task List Container -->
+                        <div id="availableTasksList" class="space-y-3">
+                            <!-- Dynamic Tasks Populated Here -->
+                            <div class="p-4 bg-slateBlue/50 border border-slate-800 rounded-xl text-xs text-slate-400 text-center">
+                                বর্তমানে কোনো নতুন অর্ডার পেন্ডিং নেই।
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Working List & Submit File with Validation -->
+                    <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-lg font-bold mb-4 flex items-center space-x-2 text-indigo-400">
+                            <i data-lucide="play-circle" class="w-5 h-5"></i>
+                            <span>চলতি কাজ (Working List) ও ফাইল সাবমিশন</span>
+                        </h3>
+                        <div id="workingTasksList" class="space-y-3">
+                            <div class="p-4 bg-slateBlue/50 border border-slate-800 rounded-xl text-xs text-slate-400 text-center">
+                                আপনার কোনো চলতি কাজ নেই। একটি টাস্ক এক্সেপ্ট করুন।
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Free AI Resource Hub & Wallet -->
+                <div class="space-y-6">
+                    <!-- Free AI Resource Hub -->
+                    <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-sm font-bold mb-3 flex items-center space-x-2 text-blue-400">
+                            <i data-lucide="cpu" class="w-4 h-4"></i>
+                            <span>ফ্রি এআই রিসোর্স হাব (AI Tools)</span>
+                        </h3>
+                        <div class="space-y-2 text-xs">
+                            <a href="https://opus.pro" target="_blank" class="block p-2.5 bg-slateBlue hover:bg-slate-800 rounded-xl border border-slate-700 transition flex justify-between items-center">
+                                <span>1. Opus Clip (Shorts AI)</span>
+                                <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+                            </a>
+                            <a href="https://elevenlabs.io" target="_blank" class="block p-2.5 bg-slateBlue hover:bg-slate-800 rounded-xl border border-slate-700 transition flex justify-between items-center">
+                                <span>2. ElevenLabs (Voice Dubbing)</span>
+                                <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+                            </a>
+                            <a href="https://www.capcut.com" target="_blank" class="block p-2.5 bg-slateBlue hover:bg-slate-800 rounded-xl border border-slate-700 transition flex justify-between items-center">
+                                <span>3. CapCut Desktop/Web</span>
+                                <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Creator Wallet & Earnings -->
+                    <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-sm font-bold mb-3 flex items-center space-x-2 text-emerald-400">
+                            <i data-lucide="wallet" class="w-4 h-4"></i>
+                            <span>ওয়ালেট ও স্যালারি লেজার</span>
+                        </h3>
+                        <div class="p-4 bg-slateBlue/50 rounded-xl border border-slate-800 space-y-2 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">এই মাসের জমা স্যালারি:</span>
+                                <span id="creatorWalletBalance" class="font-bold text-emerald-400">৳ ০.০০</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">পেমেন্ট অ্যাকাউন্ট:</span>
+                                <span id="creatorAccountRef" class="text-slate-300">সেটআপ করা হয়নি</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= ADMIN PANEL ================= -->
+        <div id="adminPanel" class="space-y-8 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-darkCharcoal/60 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs text-slate-400">মোট অর্ডার</span>
+                    <h4 id="adminTotalOrders" class="text-2xl font-bold text-blue-400 mt-1">০</h4>
+                </div>
+                <div class="bg-darkCharcoal/60 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs text-slate-400">মোট আয় (Platform Share)</span>
+                    <h4 id="adminTotalRevenue" class="text-2xl font-bold text-emerald-400 mt-1">৳ ০</h4>
+                </div>
+                <div class="bg-darkCharcoal/60 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs text-slate-400">সক্রিয় ক্রিয়েটর</span>
+                    <h4 id="adminActiveCreators" class="text-2xl font-bold text-indigo-400 mt-1">০ জন</h4>
+                </div>
+                <div class="bg-darkCharcoal/60 border border-slate-800 p-4 rounded-xl">
+                    <span class="text-xs text-slate-400">পেন্ডিং পেমেন্ট / রিফান্ড</span>
+                    <h4 id="adminPendingRefund" class="text-2xl font-bold text-amber-400 mt-1">৳ ০</h4>
+                </div>
+            </div>
+
+            <!-- Admin Detailed Tabs / Tables -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Receipt & Code Tracking -->
+                <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h3 class="text-lg font-bold flex items-center space-x-2 text-amber-400">
+                        <i data-lucide="receipt" class="w-5 h-5"></i>
+                        <span>রিসিট ও কোড ট্র্যাকিং (First & Second Receipt)</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="border-b border-slate-800 text-slate-400">
+                                <tr>
+                                    <th class="py-2">কোড / TrxID</th>
+                                    <th class="py-2">রিসিট টাইপ</th>
+                                    <th class="py-2">টাকা</th>
+                                    <th class="py-2">স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminReceiptTableBody">
+                                <tr>
+                                    <td colspan="4" class="py-4 text-center text-slate-500">কোনো রিসিট হিস্ট্রি নেই।</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Creator Management & Status Control -->
+                <div class="bg-darkCharcoal/60 backdrop-blur border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h3 class="text-lg font-bold flex items-center space-x-2 text-amber-400">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                        <span>ক্রিয়েটর ম্যানেজমেন্ট ও স্যালারি পে-আউট</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="border-b border-slate-800 text-slate-400">
+                                <tr>
+                                    <th class="py-2">নাম</th>
+                                    <th class="py-2">বিকাশ / Google Pay</th>
+                                    <th class="py-2">ব্যালেন্স</th>
+                                    <th class="py-2">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminCreatorTableBody">
+                                <tr>
+                                    <td colspan="4" class="py-4 text-center text-slate-500">কোনো ক্রিয়েটর রেজিস্টার্ড নেই।</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global State Store
+        let appData = {
+            orders: [],
+            creators: [],
+            usedLinks: new Set(),
+            currentCreator: null,
+            aiTokenExhausted: false
+        };
+
+        // Initialize Lucide Icons
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            renderAdminDashboard();
+        });
+
+        // Tab Switching Logic
+        function switchTab(tab) {
+            document.getElementById('customerPanel').classList.add('hidden');
+            document.getElementById('creatorPanel').classList.add('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+
+            document.getElementById('navCustomer').className = "px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-darkCharcoal transition";
+            document.getElementById('navCreator').className = "px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-darkCharcoal transition";
+            document.getElementById('navAdmin').className = "px-3 py-1.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-darkCharcoal transition";
+
+            if (tab === 'customer') {
+                document.getElementById('customerPanel').classList.remove('hidden');
+                document.getElementById('navCustomer').className = "px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-600 text-white transition shadow-sm";
+            } else if (tab === 'creator') {
+                document.getElementById('creatorPanel').classList.remove('hidden');
+                document.getElementById('navCreator').className = "px-3 py-1.5 rounded-lg text-sm font-medium bg-indigo-600 text-white transition shadow-sm";
+            } else if (tab === 'admin') {
+                document.getElementById('adminPanel').classList.remove('hidden');
+                document.getElementById('navAdmin').className = "px-3 py-1.5 rounded-lg text-sm font-medium bg-amber-600 text-white transition shadow-sm";
+                renderAdminDashboard();
+            }
+            lucide.createIcons();
+        }
+
+        // Language Switcher Function
+        function switchLanguage(lang) {
+            const heroTitle = document.getElementById('heroTitle');
+            const heroSub = document.getElementById('heroSub');
+            if (lang === 'en') {
+                heroTitle.innerText = "Your Video Editing & AI Automation Hub";
+                heroSub.innerText = "100% Secure, Fast, and Reliable Smart Video Marketplace.";
+            } else {
+                heroTitle.innerText = "আপনার ভিডিও এডিটিং ও এআই অটোমেশন হাব";
+                heroSub.innerText = "১০০% সিকিউর, দ্রুত এবং নির্ভরযোগ্য স্মার্ট ভিডিও মার্কেটপ্লেস।";
+            }
+        }
+
+        // Handle Order Submission with Smart Filtering
+        function handleOrderSubmit(e) {
+            e.preventDefault();
+
+            if (appData.creators.filter(c => c.active).length === 0) {
+                alert("বর্তমানে কোনো সক্রিয় ক্রিয়েটর খালি নেই, তাই সাময়িকভাবে নতুন অর্ডার নেওয়া হচ্ছে না।");
+                return;
+            }
+
+            const sourceLink = document.getElementById('sourceLink').value.trim();
+            
+            // Check Duplication
+            if (appData.usedLinks.has(sourceLink)) {
+                alert("সতর্কতা: এই সোর্স লিংকটি ইতিপূর্বে অন্য কোনো অর্ডারে ব্যবহার করা হয়েছে। দয়া করে সঠিক নতুন লিংক প্রদান করুন।");
+                return;
+            }
+
+            // Check Restricted Content (Sexual / Offensive keywords filter)
+            const desc = document.getElementById('orderDesc').value.toLowerCase();
+            const restrictedWords = ['porn', 'sex', 'adult', 'nude', 'xxx', 'secy'];
+            if (restrictedWords.some(word => sourceLink.toLowerCase().includes(word) || desc.includes(word))) {
+                alert("দুঃখিত, এই কন্টেন্টটি আমাদের সার্ভিস পলিসির সাথে সামঞ্জস্যপূর্ণ নয় এবং স্বয়ংক্রিয়ভাবে রিজেক্ট করা হলো।");
+                return;
+            }
+
+            const newOrder = {
+                id: 'ST-' + Math.floor(100000 + Math.random() * 900000),
+                name: document.getElementById('custName').value,
+                handle: document.getElementById('custHandle').value,
+                fromLang: document.getElementById('fromLang').value,
+                toLang: document.getElementById('toLang').value,
+                platform: document.getElementById('videoPlatform').value,
+                style: document.getElementById('editStyle').value,
+                duration: document.getElementById('videoDuration').value,
+                sourceLink: sourceLink,
+                desc: document.getElementById('orderDesc').value,
+                payMethod: document.getElementById('payMethod').value,
+                trxId: document.getElementById('trxId').value,
+                status: 'Pending Assignment',
+                assignedCreator: null,
+                deliveredLink: null,
+                receiptType: 'First Receipt (Advance)'
+            };
+
+            appData.usedLinks.add(sourceLink);
+            appData.orders.push(newOrder);
+            
+            alert('আপনার অর্ডার সফলভাবে সাবমিট হয়েছে! আপনার প্রজেক্ট কোড: ' + newOrder.id);
+            document.getElementById('orderForm').reset();
+            renderCreatorTasks();
+        }
+
+        // Customer Search Order
+        function searchCustomerOrder() {
+            const query = document.getElementById('searchCodeInput').value.trim();
+            const resultBox = document.getElementById('searchResultBox');
+            const resCode = document.getElementById('resCode');
+            const resStatus = document.getElementById('resStatus');
+            const resDetails = document.getElementById('resDetails');
+            const resLinkContainer = document.getElementById('resLinkContainer');
+
+            const order = appData.orders.find(o => o.id === query || o.trxId === query);
+
+            if (!order) {
+                resultBox.classList.remove('hidden');
+                resCode.innerText = "Not Found";
+                resStatus.innerText = "Error";
+                resDetails.innerText = "এই কোড বা TrxID দিয়ে কোনো অর্ডার পাওয়া যায়নি।";
+                resLinkContainer.innerHTML = "";
+                return;
+            }
+
+            resultBox.classList.remove('hidden');
+            resCode.innerText = "Order ID: " + order.id;
+            resStatus.innerText = "Status: " + order.status;
+            resDetails.innerText = `প্লাটফর্ম: ${order.platform} | স্টাইল: ${order.style} | ট্রানজেকশন: ${order.trxId}`;
+
+            if (order.deliveredLink) {
+                resLinkContainer.innerHTML = `<a href="${order.deliveredLink}" target="_blank" class="text-blue-400 underline font-semibold">ডেলিভারি ফাইল ডাউনলোড করুন</a>`;
+            } else {
+                resLinkContainer.innerHTML = `<span class="text-amber-400">কাজটি বর্তমানে প্রসেসিংয়ে রয়েছে...</span>`;
+            }
+        }
+
+        // Creator Signup
+        function handleCreatorSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('regCreatorName').value;
+            const bkash = document.getElementById('regBkash').value;
+            const googlePay = document.getElementById('regGooglePay').value;
+
+            const newCreator = {
+                id: 'CR-' + Math.floor(1000 + Math.random() * 9000),
+                name: name,
+                bkash: bkash,
+                googlePay: googlePay,
+                balance: 0,
+                active: true,
+                workingTasks: []
+            };
+
+            appData.creators.push(newCreator);
+            appData.currentCreator = newCreator;
+
+            alert("ক্রিয়েটর অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে! আপনার পেমেন্ট অ্যাকাউন্ট যুক্ত করা হয়েছে।");
+            document.getElementById('creatorSignupForm').reset();
+            document.getElementById('creatorAccountRef').innerText = `bKash: ${bkash} | GPay: ${googlePay}`;
+            renderCreatorTasks();
+            renderAdminDashboard();
+        }
+
+        // Toggle Creator Active/Inactive Status
+        function toggleCreatorStatus() {
+            if (!appData.currentCreator) {
+                alert("প্রথমে ক্রিয়েটর অ্যাকাউন্ট তৈরি বা সিলেক্ট করুন।");
+                return;
+            }
+            appData.currentCreator.active = !appData.currentCreator.active;
+            const btn = document.getElementById('creatorStatusToggle');
+            if (appData.currentCreator.active) {
+                btn.className = "px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-lg text-xs font-semibold";
+                btn.innerText = "Active (Online)";
+            } else {
+                btn.className = "px-3 py-1.5 bg-rose-500/20 text-rose-400 border border-rose-500/40 rounded-lg text-xs font-semibold";
+                btn.innerText = "Inactive (Offline)";
+            }
+        }
+
+        // Render Creator Tasks
+        function renderCreatorTasks() {
+            const list = document.getElementById('availableTasksList');
+            const workingList = document.getElementById('workingTasksList');
+
+            const pendingOrders = appData.orders.filter(o => o.status === 'Pending Assignment');
+
+            if (pendingOrders.length === 0) {
+                list.innerHTML = `<div class="p-4 bg-slateBlue/50 border border-slate-800 rounded-xl text-xs text-slate-400 text-center">বর্তমানে কোনো নতুন অর্ডার পেন্ডিং নেই।</div>`;
+            } else {
+                list.innerHTML = pendingOrders.map(o => `
+                    <div class="p-4 bg-slateBlue border border-slate-800 rounded-xl flex items-center justify-between text-xs">
+                        <div>
+                            <span class="font-bold text-slate-200">${o.id} (${o.platform})</span>
+                            <p class="text-slate-400">ভাষা: ${o.fromLang} ➔ ${o.toLang} | স্টাইল: ${o.style}</p>
+                            <a href="${o.sourceLink}" target="_blank" class="text-blue-400 underline">সোর্স লিংক দেখুন</a>
+                        </div>
+                        <div class="space-x-2">
+                            <button onclick="acceptTask('${o.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold">Yes (Accept)</button>
+                            <button onclick="skipTask('${o.id}')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-semibold">No (Skip)</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (!appData.currentCreator || appData.currentCreator.workingTasks.length === 0) {
+                workingList.innerHTML = `<div class="p-4 bg-slateBlue/50 border border-slate-800 rounded-xl text-xs text-slate-400 text-center">আপনার কোনো চলতি কাজ নেই।</div>`;
+            } else {
+                workingList.innerHTML = appData.currentCreator.workingTasks.map(taskId => {
+                    const ord = appData.orders.find(o => o.id === taskId);
+                    return `
+                        <div class="p-4 bg-slateBlue border border-slate-800 rounded-xl space-y-2 text-xs">
+                            <div class="flex justify-between font-bold text-slate-200">
+                                <span>প্রজেক্ট: ${ord.id}</span>
+                                <span class="text-blue-400">${ord.platform}</span>
+                            </div>
+                            <p class="text-slate-400">নির্দেশনা: ${ord.desc || 'সাধারণ এআই ট্রান্সফার'}</p>
+                            <div class="flex space-x-2">
+                                <input type="url" id="deliverInput_${ord.id}" placeholder="ড্রাইভ ডেলিভারি লিংক দিন..." class="flex-1 bg-darkCharcoal border border-slate-700 rounded-lg px-2 py-1 text-xs">
+                                <button onclick="submitDelivery('${ord.id}')" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold">+ জমা দিন</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function acceptTask(id) {
+            if (!appData.currentCreator || !appData.currentCreator.active) {
+                alert("আগে ক্রিয়েটর অ্যাকাউন্ট তৈরি করুন এবং Active মোডে থাকুন।");
+                return;
+            }
+            const ord = appData.orders.find(o => o.id === id);
+            ord.status = 'In Working';
+            ord.assignedCreator = appData.currentCreator.name;
+            appData.currentCreator.workingTasks.push(id);
+            renderCreatorTasks();
+            alert("টাস্ক সফলভাবে এক্সেপ্ট করা হয়েছে!");
+        }
+
+        function skipTask(id) {
+            alert("টাস্কটি স্কিপ করা হয়েছে।");
+        }
+
+        function submitDelivery(id) {
+            const inputVal = document.getElementById(`deliverInput_${id}`).value.trim();
+            if (!inputVal) {
+                alert("দয়া করে সঠিক ডেলিভারি ড্রাইভ লিংক দিন।");
+                return;
+            }
+
+            const ord = appData.orders.find(o => o.id === id);
+            ord.deliveredLink = inputVal;
+            ord.status = 'Completed & Delivered';
+            ord.receiptType = 'Second Receipt (Final Paid)';
+
+            // Add commission to creator wallet
+            appData.currentCreator.balance += 300; // 30% standard
+            document.getElementById('creatorWalletBalance').innerText = `৳ ${appData.currentCreator.balance}.০০`;
+
+            // Remove from working tasks
+            appData.currentCreator.workingTasks = appData.currentCreator.workingTasks.filter(t => t !== id);
+
+            renderCreatorTasks();
+            renderAdminDashboard();
+            alert("ফাইল সফলভাবে ডেলিভারি করা হয়েছে এবং আপনার ওয়ালেটে কমিশন যোগ হয়েছে!");
+        }
+
+        // Render Admin Dashboard
+        function renderAdminDashboard() {
+            document.getElementById('adminTotalOrders').innerText = appData.orders.length;
+            document.getElementById('adminActiveCreators').innerText = appData.creators.filter(c => c.active).length + " জন";
+            
+            let rev = appData.orders.filter(o => o.status === 'Completed & Delivered').length * 700;
+            document.getElementById('adminTotalRevenue').innerText = `৳ ${rev}`;
+
+            // Receipt Table
+            const receiptBody = document.getElementById('adminReceiptTableBody');
+            if (appData.orders.length === 0) {
+                receiptBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-500">কোনো রিসিট হিস্ট্রি নেই।</td></tr>`;
+            } else {
+                receiptBody.innerHTML = appData.orders.map(o => `
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 font-mono">${o.id} / ${o.trxId}</td>
+                        <td class="py-2 text-blue-400">${o.receiptType}</td>
+                        <td class="py-2">৳ ১০০০</td>
+                        <td class="py-2 text-emerald-400">${o.status}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Creator Table
+            const creatorBody = document.getElementById('adminCreatorTableBody');
+            if (appData.creators.length === 0) {
+                creatorBody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-500">কোনো ক্রিয়েটর রেজিস্টার্ড নেই।</td></tr>`;
+            } else {
+                creatorBody.innerHTML = appData.creators.map(c => `
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 font-bold">${c.name}</td>
+                        <td class="py-2 text-slate-400">bKash: ${c.bkash}</td>
+                        <td class="py-2 text-emerald-400">৳ ${c.balance}</td>
+                        <td class="py-2">
+                            <button onclick="adminToggleCreator('${c.id}')" class="px-2 py-1 bg-slate-800 rounded text-xs text-slate-300">Toggle Status</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function adminToggleCreator(id) {
+            const cr = appData.creators.find(c => c.id === id);
+            if (cr) {
+                cr.active = !cr.active;
+                renderAdminDashboard();
+                alert(`ক্রিয়েটর ${cr.name}-এর স্ট্যাটাস পরিবর্তন করা হয়েছে।`);
+            }
+        }
+    </script>
+</body>
+</html>
